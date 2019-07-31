@@ -6,7 +6,6 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
 import './App.css';
 
 class Home extends Component {
@@ -40,11 +39,11 @@ class Home extends Component {
         if ('intent' in res['entities']) {
           // Handle intent.
           for (var idx = 0; idx < res['entities']['intent'].length; idx++) {
-            if (res['entities']['intent'][idx].value == 'time_get') {
+            if (res['entities']['intent'][idx].value === 'time_get') {
               var localmoment = moment();
               localmoment.locale('th', momentTH);
               return localmoment.format('LLLL');
-            } else if (res['entities']['intent'][idx].value == 'general_wellbeing_get') {
+            } else if (res['entities']['intent'][idx].value === 'general_wellbeing_get') {
               return 'สบายดีครับ คุณละครับ?';
             }
           }
@@ -112,7 +111,7 @@ class Home extends Component {
 
     return (<>
       <Row>
-        <Col s={12}><h3>Thai Conversation</h3></Col>
+        <Col s={12}><h3>Thai Conversation</h3> <Link to="/about">About</Link></Col>
       </Row>
       <Row>
         <Col s={12}>
@@ -136,12 +135,33 @@ class Home extends Component {
   }
 }
 
+class About extends Component {
+  render() {
+    return (<>
+      <Row>
+        <Col s={12}><h3>Thai Conversation</h3> <Link to="/">Home</Link></Col>
+      </Row>
+      <Row>
+        <Col s={12}>
+          <p>This project is made possible by <a href="https://wit.ai/" target="_blank" rel="noopener noreferrer">wit.ai</a>, <a href="https://facebook.github.io/create-react-app/" target="_blank" rel="noopener noreferrer">create-react-app</a></p>
+        </Col>
+      </Row>
+      <Row>
+        <Col s={12}>
+          <p>This is heavily inspired by <a href="https://www.youtube.com/watch?v=4SJXvbsACwo&feature=youtu.be" target="_blank" rel="noopener noreferrer">a talk</a> by <a href="https://twitter.com/michaeldelfino" target="_blank" rel="noopener noreferrer">Michael Delfino</a></p>
+        </Col>
+      </Row>
+    </>);
+  }
+}
+
 class App extends Component {
   render() {
     return (
       <Router>
         <Container>
           <Route exact path="/" component={Home} />
+          <Route path="/about" component={About} />
         </Container>
       </Router>
     );
