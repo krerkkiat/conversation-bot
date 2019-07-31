@@ -14,14 +14,19 @@ class Home extends Component {
 
     this.CLIENT_TOKEN = 'RBPNY3P66LRNTEFTZ23WR7MO4IQAWEXQ';
     
-    this.GREETINGS = [
-      'สวัสดีครับ', 'สวัสดี', 'เป็นอย่างไรบ้าง?'
+    this.GREETINGS_SET = [
+      'สวัสดีครับ', 'สวัสดีจ้า', 'เป็นอย่างไรบ้าง?'
+    ];
+    this.GENERAL_WELLBEING_SET = [
+      'สบายดีครับ', 'ไม่สบาย'
     ];
 
     this.state = {
       inputText: '',
       entries: []
     };
+
+    this.conversationState = {};
 
     this.submitHandler = this.submitHandler.bind(this);
     this.onTextChangeHandler = this.onTextChangeHandler.bind(this);
@@ -39,24 +44,61 @@ class Home extends Component {
         if ('intent' in res['entities']) {
           // Handle intent.
           for (var idx = 0; idx < res['entities']['intent'].length; idx++) {
-            if (res['entities']['intent'][idx].value === 'time_get') {
+            let intent_type = res['entities']['intent'][idx].value;
+
+            if (intent_type === 'day_get') {
               var localmoment = moment();
               localmoment.locale('th', momentTH);
-              return localmoment.format('LLLL');
-            } else if (res['entities']['intent'][idx].value === 'general_wellbeing_get') {
-              return 'สบายดีครับ คุณละครับ?';
+              return localmoment.format('dddd');
+            } else if (intent_type === 'date_get') {
+              var localmoment = moment();
+              localmoment.locale('th', momentTH);
+              return localmoment.format('LL');
+            } else if (intent_type === 'time_get') {
+              var localmoment = moment();
+              localmoment.locale('th', momentTH);
+              return localmoment.format('LT');
+            } else if (intent_type === 'general_wellbeing_get') {
+              let index = Math.floor(Math.random() * this.GENERAL_WELLBEING_SET.length);
+              var response = this.GENERAL_WELLBEING_SET[index];
+              
+              if (!('general_wellbeing' in this.conversationState)) {
+                response = response + ' คุณละครับ? สบายดีไหม?';
+              }
+
+              return response;
+            } else if (intent_type === 'general_wellbeing_set') {
+              if ('general_wellbeing' in res['entities']) {
+                if (res['entities']['general_wellbeing'].length >= 1) {
+                  this.conversationState['general_wellbeing'] = res['entities']['general_wellbeing'][0]['value'];
+                }
+              }
+              
+              return '';
+            } else if (intent_type === 'name_get') {
+              var response = 'ผมชื่อบอทครับ';
+              
+              if (!('name' in this.conversationState)) {
+                response = response + ' คุณละครับ? คุณชื่ออะไรครับ?';
+              }
+              
+              return response;
+            } else if (intent_type === 'name_set') {
+              if ('name' in res['entities']) {
+                if (res['entities']['name'].length >= 1) {
+                  this.conversationState['name'] = res['entities']['name'][0]['value'];
+                }
+              }
+
+              return '';
             }
           }
+        } else if ('greetings' in res['entities']) {
+          let index = Math.floor(Math.random() * this.GREETINGS_SET.length);
+          return this.GREETINGS_SET[index];
         }
 
-        if ('greetings' in res['entities']) {
-          let index = Math.floor(Math.random() * this.GREETINGS.length);
-          return this.GREETINGS[index];
-        } else if ('general_wellbeing_get' in res['entities']) {
-          return 'สบายดีครับ';
-        } else {
-          return 'ผมไม่เข้าใจครับ';
-        }
+        return 'ผมไม่เข้าใจครับ';
      });
   }
 
@@ -113,24 +155,23 @@ class Home extends Component {
       <Row>
         <Col s={12}><h3>Thai Conversation</h3> <Link to="/about">About</Link></Col>
       </Row>
-      <Row>
+      {this.state.entries.length === 0 && <Row className="justify-content-md-center"><Col lg={3}><p>No chat entry. Start chatting!</p></Col></Row>}
+      {this.state.entries.length !== 0 && <Row>
         <Col s={12}>
           <ul className="text-entries">
             {textEntries}
           </ul>
         </Col>
+      </Row>}
+      <Row className="input-pane container">
+        <Col s={12}>
+          <Form onSubmit={this.submitHandler}>
+            <Form.Group controlId="conversationForm.Text">
+              <Form.Control size="lg" type="text" placeholder="ข้อความ" value={this.state.inputText} onChange={this.onTextChangeHandler} autocomplete="off"/>
+            </Form.Group>
+          </Form>
+        </Col>
       </Row>
-      <div className="input-pane container">
-        <Row>
-          <Col s={12}>
-            <Form onSubmit={this.submitHandler}>
-              <Form.Group controlId="conversationForm.Text">
-                <Form.Control size="lg" type="text" placeholder="ข้อความ" value={this.state.inputText} onChange={this.onTextChangeHandler} autocomplete="off"/>
-              </Form.Group>
-            </Form>
-          </Col>
-        </Row>
-      </div>
     </>);
   }
 }
