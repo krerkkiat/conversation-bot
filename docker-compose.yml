@@ -1,0 +1,24 @@
+version: '3.1'
+services:
+  nginx:
+    image: nginx
+    expose:
+      - "80"
+    volumes:
+      - ./build:/usr/share/nginx/html:ro
+    networks:
+      - internal
+      - traefik
+    environment:
+      - NGINX_HOST=chat.kchusap.com
+    labels:
+      - "traefik.docker.network=traefik"
+      - "traefik.enable=true"
+      - "traefik.chat.frontend.rule=Host:chat.kchusap.com"
+      - "traefik.chat.port=80"
+      - "traefik.chat.protocol=http"
+
+networks:
+  internal:
+  traefik:
+    external: true
